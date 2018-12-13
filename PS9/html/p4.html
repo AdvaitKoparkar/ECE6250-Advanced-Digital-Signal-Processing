@@ -1,0 +1,220 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Deconvolution</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-14"><meta name="DC.source" content="p4.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Deconvolution</h1><!--introduction--><p>Problem 9.4</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Setup</a></li><li><a href="#2">Part a</a></li><li><a href="#3">Part b</a></li><li><a href="#4">Part c</a></li><li><a href="#5">Part d</a></li><li><a href="#6">Part e</a></li><li><a href="#7">Helper Function</a></li></ul></div><h2 id="1">Setup</h2><pre class="codeinput">clear <span class="string">all</span>;
+load(<span class="string">'blocks_deconv.mat'</span>);
+L = length(h);
+N = length(x);
+M = N + L - 1;
+</pre><h2 id="2">Part a</h2><pre class="codeinput">A = conv_mat(h, N);
+</pre><h2 id="3">Part b</h2><pre class="codeinput">sigmas = svd(A);
+sigma1 = sigmas(1);
+x_clean = pinv(A)*y;
+figure;
+hold <span class="string">on</span>;
+xlabel(<span class="string">'n'</span>);
+ylabel(<span class="string">'x, x_clean'</span>);
+title(<span class="string">'Reconstruction of x_clean without noise'</span>)
+plot(x_clean)
+plot(x, <span class="string">'o'</span>)
+</pre><h2 id="4">Part c</h2><pre class="codeinput">x_n = pinv(A) * yn;
+figure;
+title(<span class="string">'Plotting x reconstructed from noisy observations'</span>);
+plot(x_n);
+err_x = norm(x-x_n)^2
+err_y = norm(y-yn)^2
+</pre><h2 id="5">Part d</h2><pre class="codeinput">[U, S, V] = svd(A);
+q = 250
+A_truninv = zeros(N,M);
+A_trun = zeros(M, N);
+<span class="keyword">for</span> r = 1:512-q
+    vr = V(:, r);
+    ur = U(:, r);
+    sr = S(r, r);
+    A_trun = A_trun + (sr)*ur*vr';
+<span class="keyword">end</span>
+
+A_truninv = pinv(A_trun);
+x_trunc = A_truninv*yn;
+figure; hold <span class="string">on</span>;
+plot(x);
+plot(x_trunc);
+</pre><h2 id="6">Part e</h2><pre class="codeinput">[U, S, V] = svd(A);
+U = U(:, 1:rank(A));
+V = V(1:rank(A), :);
+S = S(1:rank(A), 1:rank(A));
+
+delta = 0.001;
+err = zeros(length(delta), 1);
+sigmat = S.^2 + delta*eye(rank(A));
+x_tik = V * pinv(sigmat) * S * U' * yn;
+
+figure;
+hold <span class="string">on</span>;
+plot(x)
+plot(x_tik);
+</pre><h2 id="7">Helper Function</h2><pre class="codeinput"><span class="keyword">function</span> [A] = conv_mat(h, N)
+    L = length(h);
+    M = N + L - 1;
+    h_new = zeros(2*N + L - 2, 1);
+    h_new(1:N-1) = 0;
+    h_new(N:N+L-1) = h;
+    h_new(N+L:2*N+L-2) = 0;
+    A = zeros(M, N);
+    <span class="keyword">for</span> i = [1:M]
+        <span class="keyword">for</span> j = [1:N]
+            A(i, j) = h_new((i+N) - j);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Deconvolution
+% Problem 9.4
+%% Setup
+clear all;
+load('blocks_deconv.mat');
+L = length(h);
+N = length(x);
+M = N + L - 1;
+
+%% Part a
+A = conv_mat(h, N);
+
+%% Part b
+sigmas = svd(A);
+sigma1 = sigmas(1);
+x_clean = pinv(A)*y;
+figure;
+hold on;
+xlabel('n');
+ylabel('x, x_clean');
+title('Reconstruction of x_clean without noise')
+plot(x_clean)
+plot(x, 'o')
+
+%% Part c
+x_n = pinv(A) * yn;
+figure;
+title('Plotting x reconstructed from noisy observations');
+plot(x_n);
+err_x = norm(x-x_n)^2
+err_y = norm(y-yn)^2
+
+%% Part d
+[U, S, V] = svd(A);
+q = 250
+A_truninv = zeros(N,M);
+A_trun = zeros(M, N);
+for r = 1:512-q
+    vr = V(:, r);
+    ur = U(:, r);
+    sr = S(r, r);
+    A_trun = A_trun + (sr)*ur*vr';
+end
+
+A_truninv = pinv(A_trun);
+x_trunc = A_truninv*yn;
+figure; hold on;
+plot(x);
+plot(x_trunc);
+
+%% Part e
+[U, S, V] = svd(A);
+U = U(:, 1:rank(A));
+V = V(1:rank(A), :);
+S = S(1:rank(A), 1:rank(A));
+
+delta = 0.001;
+err = zeros(length(delta), 1);
+sigmat = S.^2 + delta*eye(rank(A));
+x_tik = V * pinv(sigmat) * S * U' * yn;
+
+figure;
+hold on;
+plot(x)
+plot(x_tik);
+
+
+%% Helper Function
+function [A] = conv_mat(h, N)
+    L = length(h);
+    M = N + L - 1;
+    h_new = zeros(2*N + L - 2, 1);
+    h_new(1:N-1) = 0;
+    h_new(N:N+L-1) = h;
+    h_new(N+L:2*N+L-2) = 0;
+    A = zeros(M, N);
+    for i = [1:M]
+        for j = [1:N]
+            A(i, j) = h_new((i+N) - j);
+        end
+    end      
+end
+##### SOURCE END #####
+--></body></html>
